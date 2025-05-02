@@ -31,21 +31,27 @@ jobs:
       #   run: |
       #     bear -- make clean && make
 
-      - name: Install clang
+      - name: Install LLVM/Clang
         env:
-          CLANG_VERSION: '14.0.0'
+          CLANG_VERSION: '19'  # Ubuntu 24.04 (Noble) only supports LLVM 19
         run: |
           sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" ${{env.CLANG_VERSION}}
-          sudo apt install -y clang-tools-${{env.CLANG_VERSION}} libc++-${{env.CLANG_VERSION}}-dev
+          sudo apt install -y \
+            clang-${{env.CLANG_VERSION}} \
+            clang-tools-${{env.CLANG_VERSION}} \
+            clang-scan-deps-${{env.CLANG_VERSION}} \
+            libc++-${{env.CLANG_VERSION}}-dev \
+            libc++abi-${{env.CLANG_VERSION}}-dev
+
       - name: Generate compilation database and build
         env:
-          CLANG_VERSION: '14.0.0'
+          CLANG_VERSION: '19'
         run: |
-          mkdir build
+          mkdir -p build
           cmake -S . -B build -G Ninja \
-          -DCMAKE_CXX_COMPILER=clang++-${{env.CLANG_VERSION}} \
-          -DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=clang-scan-deps-${{env.CLANG_VERSION}}
-          # The project needs to be built so the `.modmap` files are generated 
+            -DCMAKE_C_COMPILER=clang-${{env.CLANG_VERSION}} \
+            -DCMAKE_CXX_COMPILER=clang++-${{env.CLANG_VERSION}} \
+            -DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=clang-scan-deps-${{env.CLANG_VERSION}}
           cmake --build build --target all
       
 
