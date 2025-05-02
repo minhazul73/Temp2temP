@@ -74,6 +74,8 @@ jobs:
             -Dsonar.projectKey=minhazul73_Temp2temP
             -Dsonar.organization=minhazul73
             -Dsonar.cfamily.build-wrapper-output=build_wrapper_output
-            -Dsonar.coverageReportPaths=coverage.xml
+            # -Dsonar.coverageReportPaths=coverage.xml
             -Dsonar.c.file.suffixes=.c,.h
             -Dsonar.language=c
+            -Dsonar.sources=src
+            -Dsonar.tests=tests
