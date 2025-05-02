@@ -25,6 +25,13 @@ jobs:
         run: |
           build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} make clean && make
 
+      - name: Verify Build Wrapper Output
+        run: |
+          if [ ! -f ${{ env.BUILD_WRAPPER_OUT_DIR }}/build-wrapper-dump.json ]; then
+            echo "Error: build-wrapper-dump.json not found!";
+            exit 1;
+          fi
+
       - name: Run Tests
         run: |
           gcc -Wall -Wextra -I./include tests/test_converter.c src/converter.c -o tests/test_converter
