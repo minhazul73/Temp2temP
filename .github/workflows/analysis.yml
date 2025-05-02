@@ -39,28 +39,25 @@ jobs:
           sudo apt install -y \
             clang-${{env.CLANG_VERSION}} \
             clang-tools-${{env.CLANG_VERSION}} \
-            clang-scan-deps-${{env.CLANG_VERSION}} \
             libc++-${{env.CLANG_VERSION}}-dev \
             libc++abi-${{env.CLANG_VERSION}}-dev
 
       - name: Generate compilation database and build
-        env:
-          CLANG_VERSION: '19'
         run: |
           mkdir -p build
           cmake -S . -B build -G Ninja \
-            -DCMAKE_C_COMPILER=clang-${{env.CLANG_VERSION}} \
-            -DCMAKE_CXX_COMPILER=clang++-${{env.CLANG_VERSION}} \
-            -DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=clang-scan-deps-${{env.CLANG_VERSION}}
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++
           cmake --build build --target all
-      
 
       - name: Verify Compilation Database
         run: |
-          if [ ! -f compile_commands.json ]; then
+          if [ ! -f build/compile_commands.json ]; then
             echo "##[error] Compilation database not generated!"
             exit 1
           fi
+          cp build/compile_commands.json .
           type compile_commands.json
 
       - name: Run Tests
