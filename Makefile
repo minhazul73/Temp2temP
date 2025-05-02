@@ -6,17 +6,23 @@ TARGET = temp_converter
 SRCS = $(wildcard src/*.c)
 OBJS = $(SRCS:.c=.o)
 
-.PHONY: all clean test
+TEST_SRCS = $(wildcard tests/*.c)
+TEST_OBJS = $(filter-out tests/test_runner.o, $(TEST_SRCS:.c=.o))
+
+.PHONY: all clean test run-tests
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-test:
-	$(CC) $(CFLAGS) -c tests/test_converter.c -o tests/test_converter.o
-	$(CC) $(CFLAGS) tests/test_converter.o src/converter.c -o tests/test_converter $(LDFLAGS)
-	./tests/test_converter
+run-tests: tests/test_all
+	@echo "Running tests/test_all..."
+	./tests/test_all
+
+test: $(TEST_OBJS) tests/test_runner.o src/converter.o
+	$(CC) $(CFLAGS) -o tests/test_all $^ 
+	./tests/test_all
 
 clean:
-	rm -f $(OBJS) $(TARGET) tests/*.o tests/test_converter
+	rm -f $(OBJS) $(TARGET) tests/*.o tests/test_all
