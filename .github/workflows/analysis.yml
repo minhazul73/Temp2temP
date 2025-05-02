@@ -40,27 +40,40 @@ jobs:
       - name: Install gcovr
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcovr
+          sudo apt-get install -y lcov gcovr
 
-      - name: Generate Coverage Report
+      - name: Build with Coverage
         run: |
-          gcovr -r . --xml-pretty --output coverage.xml
+          gcc -fprofile-arcs -ftest-coverage -Wall -Wextra -I./include \
+              src/converter.c tests/test_converter.c -o tests/test_converter
 
-      - name: Upload Coverage to SonarCloud
-        uses: SonarSource/sonarqube-scan-action@v5.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
-            --define sonar.coverageReportPaths=coverage.xml
+      - name: Run Tests and Generate Coverage
+        run: |
+          ./tests/test_converter
+          gcovr --exclude tests/ \
+                --root . \
+                --xml-pretty \
+                --output coverage.xml
+
+      - name: Verify Coverage File
+        run: |
+          if [ ! -f coverage.xml ]; then
+            echo "##[error] Coverage file not generated!"
+            exit 1
+          fi
+          cat coverage.xml
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v4
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.projectKey=minhazul73_Temp2temP
+            -Dsonar.organization=minhazul73
+            -Dsonar.cfamily.build-wrapper-output=build_wrapper_output
+            -Dsonar.coverageReportPaths=coverage.xml
+            -Dsonar.c.file.suffixes=.c,.h
+            -Dsonar.language=c
