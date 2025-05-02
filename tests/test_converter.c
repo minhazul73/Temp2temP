@@ -44,15 +44,12 @@ void test_invalid_unit() {
     printf("[PASS] test_invalid_unit\n");
 }
 
-int main() {
-    printf("Running tests...\n");
+void test_all_conversions() {
     test_celsius_to_fahrenheit();
     test_fahrenheit_to_celsius();
     test_celsius_to_kelvin();
     test_kelvin_to_celsius();
     test_fahrenheit_to_kelvin();
     test_kelvin_to_fahrenheit();
-    test_invalid_unit();
-    printf("All tests passed!\n");
-    return 0;
+    printf("[PASS] All conversion tests passed!\n");
 }
