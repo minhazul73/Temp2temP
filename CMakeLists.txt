@@ -23,8 +23,14 @@ add_executable(temp_converter
     src/ui.c
 )
 
-# Add the test executable
+# Add a target for the test executable
 add_executable(test_converter
+    tests/test_runner.c
     tests/test_converter.c
+    tests/test_main.c
+    tests/test_ui.c
     src/converter.c
 )
+
+# Link libraries if needed (e.g., for coverage)
+target_link_libraries(test_converter PRIVATE gcov)
