@@ -65,10 +65,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcovr
 
+      - name: Run All Tests
+        run: |
+          gcc -Wall -Wextra -I./include tests/test_runner.c src/converter.c -o tests/test_all
+          ./tests/test_all
+
       - name: Run Tests and Generate Coverage
         run: |
-          gcc -fprofile-arcs -ftest-coverage -Wall -Wextra -I./include tests/test_converter.c src/converter.c -o tests/test_converter
-          ./tests/test_converter
+          gcc -fprofile-arcs -ftest-coverage -Wall -Wextra -I./include tests/test_runner.c src/converter.c -o tests/test_all
+          ./tests/test_all
           gcovr --sonarqube coverage.xml -r .
 
       - name: Verify Coverage File
