@@ -58,7 +58,7 @@ jobs:
             exit 1
           fi
           cp build/compile_commands.json .
-          type compile_commands.json
+          cat compile_commands.json
 
       - name: Run Tests
         run: |
