@@ -44,6 +44,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
+            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.projectKey=minhazul73_Temp2temP
             -Dsonar.organization=minhazul73
