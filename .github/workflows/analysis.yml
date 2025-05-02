@@ -37,6 +37,11 @@ jobs:
           gcc -Wall -Wextra -I./include tests/test_converter.c src/converter.c -o tests/test_converter
           ./tests/test_converter
 
+      - name: Install gcovr
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcovr
+
       - name: Generate Coverage Report
         run: |
           gcovr -r . --xml-pretty --output coverage.xml
