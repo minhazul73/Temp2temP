@@ -18,18 +18,36 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Install Bear (Linux)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y bear
+      # - name: Install Bear (Linux)
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y bear
 
-      - name: Verify Bear Installation
-        run: |
-          bear --version
+      # - name: Verify Bear Installation
+      #   run: |
+      #     bear --version
 
-      - name: Generate Compilation Database
+      # - name: Generate Compilation Database
+      #   run: |
+      #     bear -- make clean && make
+
+      - name: Install clang
+        env:
+          CLANG_VERSION: '14.0.0'
         run: |
-          bear -- make clean && make
+          sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" ${{env.CLANG_VERSION}}
+          sudo apt install -y clang-tools-${{env.CLANG_VERSION}} libc++-${{env.CLANG_VERSION}}-dev
+      - name: Generate compilation database and build
+        env:
+          CLANG_VERSION: '14.0.0'
+        run: |
+          mkdir build
+          cmake -S . -B build -G Ninja \
+          -DCMAKE_CXX_COMPILER=clang++-${{env.CLANG_VERSION}} \
+          -DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=clang-scan-deps-${{env.CLANG_VERSION}}
+          # The project needs to be built so the `.modmap` files are generated 
+          cmake --build build --target all
+      
 
       - name: Verify Compilation Database
         run: |
