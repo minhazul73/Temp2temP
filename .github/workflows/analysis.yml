@@ -18,38 +18,36 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Install Build Wrapper
-        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v5
-
-      - name: Run Build Wrapper
+      - name: Generate Compilation Database
         run: |
-          build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} make clean && make
+          pip install bear
+          bear -- make clean && make
 
-      - name: Verify Build Wrapper Output
+      - name: Verify Compilation Database
         run: |
-          if [ ! -f ${{ env.BUILD_WRAPPER_OUT_DIR }}/build-wrapper-dump.json ]; then
-            echo "Error: build-wrapper-dump.json not found!";
-            exit 1;
+          if [ ! -f compile_commands.json ]; then
+            echo "##[error] Compilation database not generated!"
+            exit 1
           fi
+          type compile_commands.json
 
       - name: Run Tests
         run: |
           gcc -Wall -Wextra -I./include tests/test_converter.c src/converter.c -o tests/test_converter
           ./tests/test_converter
 
-      - name: Install gcovr
+      - name: Install gcovr (Windows)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y lcov gcovr
+          pip install gcovr
 
-      - name: Build with Coverage
+      - name: Build with Coverage (Windows)
         run: |
           gcc -fprofile-arcs -ftest-coverage -Wall -Wextra -I./include \
-              src/converter.c tests/test_converter.c -o tests/test_converter
+              src/converter.c tests/test_converter.c -o tests/test_converter.exe
 
-      - name: Run Tests and Generate Coverage
+      - name: Run Tests and Generate Coverage (Windows)
         run: |
-          ./tests/test_converter
+          .\tests\test_converter.exe
           gcovr --exclude tests/ \
                 --root . \
                 --xml-pretty \
@@ -61,7 +59,7 @@ jobs:
             echo "##[error] Coverage file not generated!"
             exit 1
           fi
-          cat coverage.xml
+          type coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5
@@ -73,8 +71,8 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.projectKey=minhazul73_Temp2temP
             -Dsonar.organization=minhazul73
-            -Dsonar.cfamily.build-wrapper-output=build_wrapper_output
-            # -Dsonar.coverageReportPaths=coverage.xml
+            -Dsonar.cfamily.compile-commands=compile_commands.json
+            -Dsonar.coverageReportPaths=coverage.xml
             -Dsonar.c.file.suffixes=.c,.h
             -Dsonar.language=c
             -Dsonar.sources=src
