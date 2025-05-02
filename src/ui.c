@@ -2,7 +2,8 @@
 #include <stdio.h>
 
 void run_conversion_loop() {
-    char from_unit[2], to_unit[2];
+    char from_unit[2]; 
+    char to_unit[2];
     double temp;
     
     printf("Temperature Converter\n");
