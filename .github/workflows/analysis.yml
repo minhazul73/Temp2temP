@@ -37,7 +37,11 @@ jobs:
           gcc -Wall -Wextra -I./include tests/test_converter.c src/converter.c -o tests/test_converter
           ./tests/test_converter
 
-      - name: SonarCloud Scan
+      - name: Generate Coverage Report
+        run: |
+          gcovr -r . --xml-pretty --output coverage.xml
+
+      - name: Upload Coverage to SonarCloud
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,7 +49,13 @@ jobs:
         with:
           args: >
             --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.projectKey=minhazul73_Temp2temP
-            -Dsonar.organization=minhazul73
-            -Dsonar.cfamily.build-wrapper-output=build-wrapper-output
+            --define sonar.coverageReportPaths=coverage.xml
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            --define sonar.cfamily.compile-commands="${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json"
